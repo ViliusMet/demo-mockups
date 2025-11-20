@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A&W Equipment Catalogue</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- DataTables CSS with Bootstrap 5 styling -->
+    <link href="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.7/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        /* ===========================================
+           A&W Brand Color Scheme
+           - Primary Orange: #FF6B00 (A&W signature)
+           - Brown: #4A2C0A (dark brown for text/headers)
+           - Light Brown: #8B5A2B (accents)
+           - Background: #F5F5F5 (off-white)
+           - Card Background: #FFFFFF
+           =========================================== */
+        
+        :root {
+            --aw-orange: #FF6B00;
+            --aw-orange-hover: #E65A00;
+            --aw-brown: #4A2C0A;
+            --aw-brown-light: #8B5A2B;
+            --aw-bg: #F5F5F5;
+            --aw-card-bg: #FFFFFF;
+            --aw-border: #E0D5C8;
+        }
+        
+        body {
+            background-color: var(--aw-bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            color: var(--aw-brown);
+        }
+        
+        /* Header styling */
+        .page-header {
+            background: linear-gradient(135deg, var(--aw-brown) 0%, var(--aw-brown-light) 100%);
+            color: white;
+            padding: 1.5rem 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .page-header h1 {
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin: 0;
+        }
+        
+        .page-header .subtitle {
+            font-size: 0.875rem;
+            opacity: 0.9;
+            margin-top: 0.25rem;
+        }
+        
+        /* Search bar styling */
+        .search-container {
+            background: var(--aw-card-bg);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(74, 44, 10, 0.08);
+        }
+        
+        .search-input {
+            border: 2px solid var(--aw-border);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+        }
+        
+        .search-input:focus {
+            border-color: var(--aw-orange);
+            box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.15);
+            outline: none;
+        }
+        
+        .search-icon {
+            color: var(--aw-brown-light);
+        }
+        
+        /* Table container */
+        .table-container {
+            background: var(--aw-card-bg);
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 2px 8px rgba(74, 44, 10, 0.08);
+        }
+        
+        /* DataTables customization */
+        .dataTables_wrapper .dataTables_length select {
+            border: 2px solid var(--aw-border);
+            border-radius: 6px;
+            padding: 0.375rem 2rem 0.375rem 0.75rem;
+        }
+        
+        .dataTables_wrapper .dataTables_info {
+            color: var(--aw-brown-light);
+            font-size: 0.875rem;
+            padding-top: 1rem;
+        }
+        
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            border-radius: 6px !important;
+            margin: 0 2px;
+        }
+        
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+            background: var(--aw-orange) !important;
+            border-color: var(--aw-orange) !important;
+            color: white !important;
+        }
+        
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            background: var(--aw-bg) !important;
+            border-color: var(--aw-border) !important;
+            color: var(--aw-brown) !important;
+        }
+        
+        /* Table styling */
+        #equipmentTable {
+            width: 100% !important;
+        }
+        
+        #equipmentTable thead th {
+            background: var(--aw-brown);
+            color: white;
+            font-weight: 600;
+            border: none;
+            padding: 0.875rem;
+            font-size: 0.875rem;
+        }
+        
+        #equipmentTable tbody tr {
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+        }
+        
+        #equipmentTable tbody tr:hover {
+            background-color: rgba(255, 107, 0, 0.08) !important;
+        }
+        
+        #equipmentTable tbody td {
+            padding: 0.875rem;
+            vertical-align: middle;
+            border-color: var(--aw-border);
+            font-size: 0.875rem;
+        }
+        
+        /* Hide default DataTables search */
+        .dataTables_filter {
+            display: none !important;
+        }
+        
+        /* Detail View Styling */
+        .detail-header {
+            background: linear-gradient(135deg, var(--aw-brown) 0%, var(--aw-brown-light) 100%);
+            color: white;
+            padding: 1.5rem 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .detail-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+        
+        .detail-meta {
+            font-size: 0.8125rem;
+            opacity: 0.9;
+        }
+        
+        .action-buttons .btn {
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+        }
+        
+        .btn-icon {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        
+        .btn-icon:hover {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+        }
+        
+        /* Back button */
+        .btn-back {
+            background: var(--aw-orange);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+        }
+        
+        .btn-back:hover {
+            background: var(--aw-orange-hover);
+            color: white;
+        }
+        
+        /* Detail cards */
+        .detail-card {
+            background: var(--aw-card-bg);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(74, 44, 10, 0.08);
+        }
+        
+        .detail-card-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--aw-brown-light);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .detail-card-content {
+            font-size: 0.9375rem;
+            color: var(--aw-brown);
+        }
+        
+        .price-amount {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--aw-orange);
+        }
+        
+        .price-note {
+            font-size: 0.8125rem;
+            color: var(--aw-brown-light);
+            margin-top: 0.5rem;
+        }
+        
+        .supplier-link {
+            color: var(--aw-orange);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .supplier-link:hover {
+            text-decoration: underline;
+            color: var(--aw-orange-hover);
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.375rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8125rem;
+            font-weight: 600;
+        }
+        
+        .status-active {
+            background: rgba(40, 167, 69, 0.15);
+            color: #1e7e34;
+        }
+        
+        .status-inactive {
+            background: rgba(108, 117, 125, 0.15);
+            color: #495057;
+        }
+        
+        /* Image placeholder */
+        .image-placeholder {
+            background: var(--aw-bg);
+            border: 2px dashed var(--aw-border);
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            color: var(--aw-brown-light);
+        }
+        
+        .image-placeholder i {
+            font-size: 3rem;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 767.98px) {
+            .page-header h1 {
+                font-size: 1.25rem;
+            }
+            
+            .detail-title {
+                font-size: 1.125rem;
+            }
+            
+            .action-buttons {
+                margin-top: 1rem;
+            }
+            
+            .price-amount {
+                font-size: 1.25rem;
+            }
+            
+            /* Hide Supplier and Category columns on mobile */
+            #equipmentTable th:nth-child(3),
+            #equipmentTable td:nth-child(3),
+            #equipmentTable th:nth-child(4),
+            #equipmentTable td:nth-child(4) {
+                display: none;
+            }
+        }
+        
+        /* Mobile pill badges for category and supplier */
+        .mobile-pills {
+            display: none;
+            margin-top: 0.5rem;
+            gap: 0.375rem;
+            flex-wrap: wrap;
+        }
+        
+        .mobile-pill {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.6875rem;
+            font-weight: 500;
+        }
+        
+        .pill-category {
+            background: rgba(255, 107, 0, 0.15);
+            color: var(--aw-orange-hover);
+        }
+        
+        .pill-supplier {
+            background: rgba(74, 44, 10, 0.1);
+            color: var(--aw-brown-light);
+        }
+        
+        @media (max-width: 767.98px) {
+            .mobile-pills {
+                display: flex;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .page-header {
+                padding: 2rem;
+            }
+            
+            .page-header h1 {
+                font-size: 1.75rem;
+            }
+            
+            .search-container {
+                padding: 1.25rem;
+            }
+            
+            .table-container {
+                padding: 1.5rem;
+            }
+            
+            .detail-header {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- =====================================================
+         LIST VIEW - Equipment Catalogue Table
+         ===================================================== -->
+    <div id="listView">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="container-fluid">
+                <h1><i class="bi bi-tools me-2"></i>Equipment Catalogue</h1>
+                <div class="subtitle">Browse and search restaurant equipment inventory</div>
+            </div>
+        </div>
+        
+        <div class="container-fluid px-3 px-md-4">
+            <!-- Search Bar -->
+            <div class="search-container">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-0">
+                        <i class="bi bi-search search-icon"></i>
+                    </span>
+                    <input type="text" 
+                           id="searchInput" 
+                           class="form-control search-input border-start-0" 
+                           placeholder="Search equipment by name, supplier, or category...">
+                </div>
+            </div>
+            
+            <!-- Equipment Table -->
+            <div class="table-container">
+                <div class="table-responsive">
+                    <table id="equipmentTable" class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Item No.</th>
+                                <th>Item Name</th>
+                                <th>Supplier</th>
+                                <th>Category</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Populated by DataTables -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- =====================================================
+         DETAIL VIEW - Equipment Details
+         ===================================================== -->
+    <div id="detailView" style="display: none;">
+        <!-- Detail Header -->
+        <div class="detail-header">
+            <div class="container-fluid">
+                <div class="row align-items-start">
+                    <div class="col-12 col-md-8">
+                        <h1 class="detail-title" id="detailTitle">Equipment Name</h1>
+                        <div class="detail-meta">
+                            <i class="bi bi-clock me-1"></i>
+                            Last modified on <span id="detailModified">January 15, 2025</span>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4 text-md-end action-buttons">
+                        <button class="btn btn-icon me-2" onclick="handleEmail()">
+                            <i class="bi bi-envelope me-1"></i>Email
+                        </button>
+                        <button class="btn btn-icon" onclick="handlePrint()">
+                            <i class="bi bi-printer me-1"></i>Print
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="container-fluid px-3 px-md-4">
+            <!-- Back Button -->
+            <button class="btn btn-back mb-4" onclick="showListView()">
+                <i class="bi bi-arrow-left me-2"></i>Back to Search
+            </button>
+            
+            <div class="row">
+                <!-- Left Column - Image & Main Info -->
+                <div class="col-12 col-lg-4 mb-4">
+                    <!-- Product Image -->
+                    <div class="detail-card">
+                        <div class="image-placeholder">
+                            <i class="bi bi-image"></i>
+                            <span>Product Image</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Status -->
+                    <div class="detail-card">
+                        <div class="detail-card-title">Status</div>
+                        <div class="detail-card-content">
+                            <span class="status-badge status-active" id="detailStatus">Active</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Category -->
+                    <div class="detail-card">
+                        <div class="detail-card-title">Category</div>
+                        <div class="detail-card-content" id="detailCategory">Dining Room</div>
+                    </div>
+                </div>
+                
+                <!-- Right Column - Details -->
+                <div class="col-12 col-lg-8">
+                    <!-- Price -->
+                    <div class="detail-card">
+                        <div class="detail-card-title">Price</div>
+                        <div class="detail-card-content">
+                            <div class="price-amount" id="detailPrice">$414.66</div>
+                            <div class="price-note">
+                                ** Shipping and taxes extra. Les frais d'expédition et les taxes en sus.<br>
+                                <small class="text-muted">Prices are subject to change without notice. Contact supplier for current pricing and availability. Les prix peuvent être modifiés sans préavis.</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Supplier & Warranty -->
+                    <div class="detail-card">
+                        <div class="detail-card-title">Supplier & Warranty</div>
+                        <div class="detail-card-content">
+                            <a href="#" class="supplier-link" id="detailSupplier">Accro Furniture</a>
+                            <div class="mt-2 text-muted" style="font-size: 0.8125rem;">
+                                Contact supplier directly for warranty information and technical support.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Description -->
+                    <div class="detail-card">
+                        <div class="detail-card-title">Description</div>
+                        <div class="detail-card-content" id="detailDescription">
+                            High-quality butcher block table top designed for A&W dining room environments. 
+                            Durable construction suitable for high-traffic restaurant use.
+                        </div>
+                    </div>
+                    
+                    <!-- Size -->
+                    <div class="detail-card">
+                        <div class="detail-card-title">Dimensions</div>
+                        <div class="detail-card-content" id="detailSize">
+                            <div class="row">
+                                <div class="col-4">
+                                    <strong>Depth:</strong><br>24"
+                                </div>
+                                <div class="col-4">
+                                    <strong>Width:</strong><br>24"
+                                </div>
+                                <div class="col-4">
+                                    <strong>Height:</strong><br>2"
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- jQuery (required for DataTables) -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- DataTables JS Core -->
+    <script src="https://cdn.jsdelivr.net/npm/datatables.net@1.13.7/js/jquery.dataTables.min.js"></script>
+    
+    <!-- DataTables Bootstrap 5 Integration -->
+    <script src="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.7/js/dataTables.bootstrap5.min.js"></script>
+    
+    <script>
+        /* ===========================================================================
+           A&W EQUIPMENT CATALOGUE - STATIC PRESALES MOCKUP
+           ===========================================================================
+           
+           OVERVIEW:
+           This is a static presales demonstration mockup for an equipment catalogue /
+           inventory lookup system. It is NOT production code.
+           
+           TECHNOLOGIES:
+           - Bootstrap 5 for responsive layout and styling (via CDN)
+           - DataTables for table search, sort, and pagination (via CDN)
+           - Vanilla JavaScript for interactivity
+           
+           LIMITATIONS:
+           - No authentication or authorization
+           - No real backend or API calls
+           - No data persistence (all data is hard-coded)
+           - No error handling for edge cases
+           
+           PRODUCTION IMPLEMENTATION WOULD REQUIRE:
+           - Replace hard-coded equipmentData array with API calls to backend
+           - Implement CSV/Excel import functionality for bulk data updates
+           - Add proper authentication (SSO, OAuth, etc.)
+           - Input validation and sanitization
+           - Error handling and user feedback
+           - Loading states and skeleton screens
+           - Image upload and management system
+           - Role-based access control
+           - Audit logging for changes
+           - Caching strategy for performance
+           - Accessibility (WCAG) compliance audit
+           
+           =========================================================================== */
+        
+        // ===========================================
+        // EQUIPMENT DATA MODEL
+        // ===========================================
+        const equipmentData = [
+            {
+                id: 1,
+                itemNumber: "D230T",
+                name: "Dining Room Table Top ONLY Butcher Block (small) – GFMGF concept",
+                category: "Dining Room",
+                supplierName: "Accro Furniture",
+                price: 414.66,
+                description: "High-quality butcher block table top designed for A&W dining room environments. Durable construction suitable for high-traffic restaurant use. Made from sustainable hardwood sources.",
+                size: { depth: 24, width: 24, height: 2 },
+                status: "Active",
+                lastModified: "2025-01-15",
+                imageUrl: null
+            },
+            {
+                id: 2,
+                itemNumber: "K450G",
+                name: "Commercial Gas Grill – 4 Burner with Infrared",
+                category: "Kitchen",
+                supplierName: "Restaurant Equip Pro",
+                price: 3249.99,
+                description: "Professional-grade 4-burner gas grill with infrared back burner. Stainless steel construction with heavy-duty grates. Perfect for high-volume burger production.",
+                size: { depth: 30, width: 48, height: 36 },
+                status: "Active",
+                lastModified: "2025-01-10",
+                imageUrl: null
+            },
+            {
+                id: 3,
+                itemNumber: "D115C",
+                name: "Stackable Dining Chair – Orange Cushion",
+                category: "Dining Room",
+                supplierName: "Accro Furniture",
+                price: 189.50,
+                description: "Comfortable stackable dining chair with signature A&W orange cushion. Steel frame with powder coat finish. Easy to clean and maintain.",
+                size: { depth: 20, width: 18, height: 32 },
+                status: "Active",
+                lastModified: "2025-01-12",
+                imageUrl: null
+            },
+            {
+                id: 4,
+                itemNumber: "K220F",
+                name: "Deep Fryer – Double Basket Commercial",
+                category: "Kitchen",
+                supplierName: "FryMaster Canada",
+                price: 2899.00,
+                description: "High-efficiency double basket deep fryer for consistent results. Features automatic filtration and temperature recovery. NSF certified.",
+                size: { depth: 24, width: 20, height: 46 },
+                status: "Active",
+                lastModified: "2024-12-28",
+                imageUrl: null
+            },
+            {
+                id: 5,
+                itemNumber: "B310W",
+                name: "Walk-In Cooler Door – 36\" Standard",
+                category: "Refrigeration",
+                supplierName: "CoolTech Systems",
+                price: 1850.00,
+                description: "Heavy-duty walk-in cooler door with self-closing hinges. Includes heated frame to prevent condensation. NSF listed components.",
+                size: { depth: 4, width: 36, height: 78 },
+                status: "Active",
+                lastModified: "2025-01-08",
+                imageUrl: null
+            },
+            {
+                id: 6,
+                itemNumber: "S105D",
+                name: "Drive-Thru Menu Board – Digital 55\"",
+                category: "Signage",
+                supplierName: "SignaTech Digital",
+                price: 4299.00,
+                description: "Weather-resistant digital menu board with high-brightness display. Includes mounting hardware and protective housing. Remote content management ready.",
+                size: { depth: 6, width: 55, height: 32 },
+                status: "Active",
+                lastModified: "2025-01-14",
+                imageUrl: null
+            },
+            {
+                id: 7,
+                itemNumber: "K180B",
+                name: "Beverage Dispenser – 6 Valve Carbonated",
+                category: "Beverage",
+                supplierName: "DrinkWorks Inc",
+                price: 5675.00,
+                description: "Commercial 6-valve carbonated beverage dispenser. Ice bank cooling system for high-volume service. Compatible with all major syrup suppliers.",
+                size: { depth: 24, width: 30, height: 36 },
+                status: "Active",
+                lastModified: "2025-01-05",
+                imageUrl: null
+            },
+            {
+                id: 8,
+                itemNumber: "D250B",
+                name: "Booth Seating – Double Sided 6ft",
+                category: "Dining Room",
+                supplierName: "Accro Furniture",
+                price: 2150.00,
+                description: "Double-sided booth seating with durable vinyl upholstery. Reinforced frame for commercial use. Easy-clean surface in A&W brown.",
+                size: { depth: 48, width: 72, height: 42 },
+                status: "Active",
+                lastModified: "2024-12-20",
+                imageUrl: null
+            },
+            {
+                id: 9,
+                itemNumber: "K310M",
+                name: "Microwave Oven – Heavy Duty 1800W",
+                category: "Kitchen",
+                supplierName: "MenuMaster Pro",
+                price: 1299.00,
+                description: "Commercial heavy-duty microwave with 1800W output. Programmable with up to 100 memory settings. Stainless steel interior for easy cleaning.",
+                size: { depth: 20, width: 22, height: 14 },
+                status: "Active",
+                lastModified: "2025-01-02",
+                imageUrl: null
+            },
+            {
+                id: 10,
+                itemNumber: "P420T",
+                name: "POS Terminal Stand – Countertop",
+                category: "Technology",
+                supplierName: "TechMount Solutions",
+                price: 175.00,
+                description: "Adjustable countertop POS terminal stand with cable management. Supports displays 12-17 inches. Locking mechanism for security.",
+                size: { depth: 8, width: 10, height: 15 },
+                status: "Active",
+                lastModified: "2025-01-11",
+                imageUrl: null
+            },
+            {
+                id: 11,
+                itemNumber: "K275P",
+                name: "Prep Table – Refrigerated 60\"",
+                category: "Kitchen",
+                supplierName: "Arctic Equipment",
+                price: 3750.00,
+                description: "Refrigerated prep table with cutting board top. Two door storage below with digital temperature control. NSF certified for food safety.",
+                size: { depth: 30, width: 60, height: 36 },
+                status: "Active",
+                lastModified: "2024-12-15",
+                imageUrl: null
+            },
+            {
+                id: 12,
+                itemNumber: "E110L",
+                name: "LED Parking Lot Light – 300W",
+                category: "Exterior",
+                supplierName: "BrightPath Lighting",
+                price: 625.00,
+                description: "Energy-efficient LED parking lot light with photocell. 50,000 hour lifespan. IP65 rated for all weather conditions.",
+                size: { depth: 4, width: 24, height: 24 },
+                status: "Active",
+                lastModified: "2025-01-07",
+                imageUrl: null
+            },
+            {
+                id: 13,
+                itemNumber: "W210S",
+                name: "Three Compartment Sink – Stainless",
+                category: "Warewashing",
+                supplierName: "SinkPro Commercial",
+                price: 1450.00,
+                description: "NSF certified three compartment sink for proper ware washing. Includes drain boards on both sides. 16 gauge stainless steel construction.",
+                size: { depth: 24, width: 90, height: 36 },
+                status: "Active",
+                lastModified: "2024-11-28",
+                imageUrl: null
+            },
+            {
+                id: 14,
+                itemNumber: "B420R",
+                name: "Root Beer Barrel – Decorative Display",
+                category: "Signage",
+                supplierName: "Heritage Displays",
+                price: 895.00,
+                description: "Iconic A&W root beer barrel for interior display. Fiberglass construction with authentic detailing. Available in multiple sizes.",
+                size: { depth: 24, width: 24, height: 36 },
+                status: "Active",
+                lastModified: "2025-01-13",
+                imageUrl: null
+            },
+            {
+                id: 15,
+                itemNumber: "K390H",
+                name: "Heat Lamp – Double Head with Stand",
+                category: "Kitchen",
+                supplierName: "HeatWave Equipment",
+                price: 445.00,
+                description: "Adjustable double-head heat lamp for food holding. Chrome finish with flexible arms. Perfect for keeping orders warm during rush periods.",
+                size: { depth: 12, width: 24, height: 24 },
+                status: "Active",
+                lastModified: "2024-12-05",
+                imageUrl: null
+            },
+            {
+                id: 16,
+                itemNumber: "D180H",
+                name: "High Chair – Commercial Grade",
+                category: "Dining Room",
+                supplierName: "Accro Furniture",
+                price: 125.00,
+                description: "Safe and sturdy commercial high chair with wide base. Easy-clean finish with safety harness included. Stackable for storage.",
+                size: { depth: 20, width: 20, height: 29 },
+                status: "Active",
+                lastModified: "2024-12-10",
+                imageUrl: null
+            },
+            {
+                id: 17,
+                itemNumber: "T150C",
+                name: "Trash Receptacle – Outdoor 35 Gal",
+                category: "Exterior",
+                supplierName: "CleanSite Products",
+                price: 375.00,
+                description: "Weather-resistant outdoor trash receptacle with dome lid. Matches A&W brand colors. Includes concrete anchor kit.",
+                size: { depth: 24, width: 24, height: 42 },
+                status: "Inactive",
+                lastModified: "2024-10-15",
+                imageUrl: null
+            }
+        ];
+        
+        // ===========================================
+        // DATATABLE INITIALIZATION
+        // ===========================================
+        let dataTable;
+        
+        $(document).ready(function() {
+            // Check if DataTables loaded properly
+            if (typeof $.fn.DataTable === 'undefined') {
+                console.error('DataTables library failed to load');
+                alert('Error: DataTables library failed to load. Please check your internet connection and refresh the page.');
+                return;
+            }
+            
+            // Initialize DataTable with equipment data
+            dataTable = $('#equipmentTable').DataTable({
+                data: equipmentData,
+                columns: [
+                    { data: 'itemNumber' },
+                    { 
+                        data: 'name',
+                        render: function(data, type, row) {
+                            // For display, add mobile pills underneath the name
+                            if (type === 'display') {
+                                return `
+                                    <div class="item-name-cell">
+                                        <div>${data}</div>
+                                        <div class="mobile-pills">
+                                            <span class="mobile-pill pill-category">${row.category}</span>
+                                            <span class="mobile-pill pill-supplier">${row.supplierName}</span>
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                            // For sorting/filtering, return just the name
+                            return data;
+                        }
+                    },
+                    { data: 'supplierName' },
+                    { data: 'category' }
+                ],
+                // Configure DataTables options
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50], [10, 25, 50]],
+                order: [[0, 'asc']], // Default sort by Item No.
+                language: {
+                    lengthMenu: 'Show _MENU_ entries',
+                    info: 'Showing _START_ to _END_ of _TOTAL_ items',
+                    infoEmpty: 'No items found',
+                    infoFiltered: '(filtered from _MAX_ total items)',
+                    paginate: {
+                        first: '<i class="bi bi-chevron-double-left"></i>',
+                        previous: '<i class="bi bi-chevron-left"></i>',
+                        next: '<i class="bi bi-chevron-right"></i>',
+                        last: '<i class="bi bi-chevron-double-right"></i>'
+                    }
+                },
+                // Make row identifiable by ID for click handling
+                rowId: 'id',
+                // Responsive table styling
+                responsive: true,
+                // State saving to preserve search/sort/page on return
+                stateSave: true
+            });
+            
+            // Connect custom search input to DataTables filter
+            $('#searchInput').on('keyup', function() {
+                dataTable.search(this.value).draw();
+            });
+            
+            // Handle row click to show detail view
+            $('#equipmentTable tbody').on('click', 'tr', function() {
+                const data = dataTable.row(this).data();
+                if (data) {
+                    showDetailView(data);
+                }
+            });
+        });
+        
+        // ===========================================
+        // VIEW NAVIGATION FUNCTIONS
+        // ===========================================
+        
+        /**
+         * Display the equipment detail view
+         * @param {Object} equipment - The equipment object to display
+         */
+        function showDetailView(equipment) {
+            // Populate detail fields
+            document.getElementById('detailTitle').textContent = 
+                `${equipment.itemNumber}: ${equipment.name}`;
+            
+            document.getElementById('detailModified').textContent = 
+                formatDate(equipment.lastModified);
+            
+            document.getElementById('detailPrice').textContent = 
+                formatPrice(equipment.price);
+            
+            document.getElementById('detailSupplier').textContent = 
+                equipment.supplierName;
+            
+            document.getElementById('detailCategory').textContent = 
+                equipment.category;
+            
+            document.getElementById('detailDescription').textContent = 
+                equipment.description;
+            
+            // Format and display dimensions
+            document.getElementById('detailSize').innerHTML = `
+                <div class="row">
+                    <div class="col-4">
+                        <strong>Depth:</strong><br>${equipment.size.depth}"
+                    </div>
+                    <div class="col-4">
+                        <strong>Width:</strong><br>${equipment.size.width}"
+                    </div>
+                    <div class="col-4">
+                        <strong>Height:</strong><br>${equipment.size.height}"
+                    </div>
+                </div>
+            `;
+            
+            // Update status badge
+            const statusEl = document.getElementById('detailStatus');
+            statusEl.textContent = equipment.status;
+            statusEl.className = 'status-badge ' + 
+                (equipment.status === 'Active' ? 'status-active' : 'status-inactive');
+            
+            // Toggle views
+            document.getElementById('listView').style.display = 'none';
+            document.getElementById('detailView').style.display = 'block';
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+        
+        /**
+         * Return to the equipment list view
+         * Preserves DataTables state (search, sort, pagination)
+         */
+        function showListView() {
+            document.getElementById('detailView').style.display = 'none';
+            document.getElementById('listView').style.display = 'block';
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+        
+        // ===========================================
+        // ACTION BUTTON HANDLERS
+        // ===========================================
+        
+        /**
+         * Handle email button click
+         * In production, this would open email client or modal
+         */
+        function handleEmail() {
+            alert('Email functionality would be implemented here.\n\nThis would open the default email client with equipment details pre-filled.');
+        }
+        
+        /**
+         * Handle print button click
+         * In production, this would trigger print dialog
+         */
+        function handlePrint() {
+            alert('Print functionality would be implemented here.\n\nThis would open the browser print dialog with a print-optimized view.');
+        }
+        
+        // ===========================================
+        // UTILITY FUNCTIONS
+        // ===========================================
+        
+        /**
+         * Format price as currency
+         * @param {number} price - The price value
+         * @returns {string} Formatted price string
+         */
+        function formatPrice(price) {
+            return new Intl.NumberFormat('en-CA', {
+                style: 'currency',
+                currency: 'CAD'
+            }).format(price);
+        }
+        
+        /**
+         * Format date string for display
+         * @param {string} dateString - ISO date string
+         * @returns {string} Formatted date string
+         */
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('en-CA', options);
+        }
+    </script>
+</body>
+</html>
